@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard de Estadísticas Académicas - Visualización de datos de estudiantes, asistencia, calificaciones y comunicados.">
+    <title>Estadísticas y Probabilidades - Dashboard Académico</title>
+    <!-- Chart.js and Style -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <!-- Main Logic -->
+    <script src="app.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <h1>Dashboard de Estadísticas Académicas</h1>
+                <p>Análisis y visualización del estado institucional en tiempo real</p>
+            </div>
+            <!-- Interactive Level Filter -->
+            <div class="controls">
+                <label for="level-filter">Nivel Educativo:</label>
+                <select id="level-filter">
+                    <option value="All">Todos los niveles</option>
+                    <option value="Inicial">Inicial</option>
+                    <option value="Primario">Primario</option>
+                    <option value="Secundario">Secundario</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- KPI Metrics Summary Section -->
+        <section class="kpi-grid" aria-label="Métricas Principales">
+            <!-- KPI 1: Total Students -->
+            <div class="kpi-card" id="kpi-students">
+                <div class="kpi-info">
+                    <span class="kpi-label">Estudiantes Totales</span>
+                    <span class="kpi-value" id="kpi-students-value">-</span>
+                    <span class="kpi-subtext" id="kpi-students-subtext">Matrícula activa</span>
+                </div>
+                <div class="kpi-icon" aria-hidden="true">👨‍🎓</div>
+            </div>
+
+            <!-- KPI 2: Overall Attendance -->
+            <div class="kpi-card" id="kpi-attendance">
+                <div class="kpi-info">
+                    <span class="kpi-label">Asistencia Promedio</span>
+                    <span class="kpi-value" id="kpi-attendance-value">-</span>
+                    <span class="kpi-subtext" id="kpi-attendance-subtext">Sobre el total de clases</span>
+                </div>
+                <div class="kpi-icon" aria-hidden="true">📅</div>
+            </div>
+
+            <!-- KPI 3: Grading / Pass Rate -->
+            <div class="kpi-card" id="kpi-grades">
+                <div class="kpi-info">
+                    <span class="kpi-label">Tasa de Aprobación</span>
+                    <span class="kpi-value" id="kpi-grades-value">-</span>
+                    <span class="kpi-subtext" id="kpi-grades-subtext">Estudiantes aprobados</span>
+                </div>
+                <div class="kpi-icon" aria-hidden="true">📈</div>
+            </div>
+
+            <!-- KPI 4: Communications success -->
+            <div class="kpi-card" id="kpi-comms">
+                <div class="kpi-info">
+                    <span class="kpi-label">Eficacia de Envíos</span>
+                    <span class="kpi-value" id="kpi-comms-value">-</span>
+                    <span class="kpi-subtext" id="kpi-comms-subtext">Entregados sin error</span>
+                </div>
+                <div class="kpi-icon" aria-hidden="true">💬</div>
+            </div>
+        </section>
+
+        <!-- Charts Grid Layout -->
+        <main class="dashboard-grid" aria-label="Panel de Gráficos">
+            
+            <!-- 1. Composición del Alumnado por Nivel (Pie Chart) -->
+            <div class="chart-card col-4">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Composición por Nivel</h2>
+                        <p class="chart-subtitle">Distribución porcentual de matrícula</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-composition">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-composition" aria-label="Composición del alumnado por nivel educativo" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Nivel de Asistencia General (Stacked Line Chart) -->
+            <div class="chart-card col-4">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Nivel de Asistencia General</h2>
+                        <p class="chart-subtitle">Presentes vs Ausentes acumulados</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-attendance-general">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-attendance-general" aria-label="Nivel de asistencia general acumulado" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 5. Nivel general de calificaciones (Stacked Bar Chart) -->
+            <div class="chart-card col-4">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Calificaciones Globales</h2>
+                        <p class="chart-subtitle">Tasa general de aprobados y desaprobados</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-grades-general">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-grades-general" aria-label="Nivel general de calificaciones aprobados y desaprobados" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 3. Comparación de niveles de asistencia por curso (Vertical Bar Chart) -->
+            <div class="chart-card col-6">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Asistencia por Curso</h2>
+                        <p class="chart-subtitle">Comparación de presentes y ausentes</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-attendance-course">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-attendance-course" aria-label="Comparación de niveles de asistencia por curso" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 6. Comparativa de niveles de calificaciones por curso (Horizontal Bar Chart) -->
+            <div class="chart-card col-6">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Calificaciones por Curso</h2>
+                        <p class="chart-subtitle">Tasa de aprobación por división</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-grades-course">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-grades-course" aria-label="Comparación de calificaciones aprobadas y desaprobadas por curso" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 4. Evolución anual de nivel de asistencia por mes (Line Chart - Linear Scale) -->
+            <div class="chart-card col-6">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Evolución Anual de Asistencia</h2>
+                        <p class="chart-subtitle">Porcentaje de asistencia mensual promedio</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-attendance-monthly">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-attendance-monthly" aria-label="Evolución anual de nivel de asistencia por mes" role="img"></canvas>
+                </div>
+            </div>
+
+            <!-- 7. Estado de situación de envío de comunicados (Multi Series Bar Chart) -->
+            <div class="chart-card col-6">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="chart-title">Envío de Comunicados</h2>
+                        <p class="chart-subtitle">Estado de entregas en la plataforma</p>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="loading-overlay" id="loader-comunicados">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Cargando gráfico...</div>
+                    </div>
+                    <canvas id="chart-comunicados" aria-label="Estado de situación de envío de comunicados" role="img"></canvas>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>Instituto IDra &bull; Tecnicatura Superior en Desarrollo de Software &bull; Estadística y Probabilidades 2026</p>
+        </footer>
+    </div>
+</body>
+
+</html>
